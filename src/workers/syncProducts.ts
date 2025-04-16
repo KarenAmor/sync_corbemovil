@@ -55,7 +55,7 @@ async function syncBatch(): Promise<void> {
       await logError({
         sync_type: 'Sync',
         record_id: p.reference,
-        table_name: 'products',
+        process: 'products',
         row_data: p,
         result: 'Error',
         error_message: err.message,
@@ -79,7 +79,7 @@ cron.schedule(process.env.SYNC_CRON_EXPRESSION || '*/10 * * * * *', async () => 
   console.log('Cronjob iniciado:', new Date().toISOString());
   
   // Logueamos el inicio
-  await logInfo({ sync_type: 'Sync', table_name: 'products', result: 'Start' });
+  await logInfo({ sync_type: 'Sync', process: 'products', result: 'Start' });
   console.log('Log de inicio registrado.');
 
   // Ejecutamos la sincronización
@@ -87,7 +87,7 @@ cron.schedule(process.env.SYNC_CRON_EXPRESSION || '*/10 * * * * *', async () => 
   console.log('Sincronización completada.');
 
   // Logueamos la finalización
-  await logInfo({ sync_type: 'Sync', table_name: 'products', result: 'End' });
+  await logInfo({ sync_type: 'Sync', process: 'products', result: 'End' });
   console.log('Log de finalización registrado.');
 });
 

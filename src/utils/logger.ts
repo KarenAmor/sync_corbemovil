@@ -8,7 +8,7 @@ const logger = winston.createLogger({
 type LogData = {
   sync_type?: string;
   record_id?: string;
-  table_name?: string;
+  process?: string;
   row_data?: any;
   result?: string;
   error_message?: string;
@@ -22,14 +22,14 @@ async function logToDb(level: string, data: LogData): Promise<void> {
   }
 
   const sql = `
-    INSERT INTO sync_logs (sync_type, record_id, table_name, row_data, event_date, result, error_message)
+    INSERT INTO sync_logs (sync_type, record_id, process, row_data, event_date, result, error_message)
     VALUES (?, ?, ?, ?, NOW(), ?, ?)
   `;
 
   const values = [
     data.sync_type || null,
     data.record_id || null, // Ahora compatible con record_id NULL
-    data.table_name || null,
+    data.process || null,
     null, // El campo data se deja vacío según los requisitos
     data.result || level,
     data.error_message || null,

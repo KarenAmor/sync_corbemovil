@@ -117,7 +117,7 @@ export async function syncProduct(product: Product): Promise<void> {
     await logError({
       sync_type: 'Sync',
       record_id: product.reference,
-      table_name: 'products',
+      process: 'products',
       row_data: product,
       result: 'Error',
       error_message: `Validation failed: ${errors.join('; ')}`,
@@ -183,7 +183,7 @@ export async function syncProduct(product: Product): Promise<void> {
     await logError({
       sync_type: 'Sync',
       record_id: product.reference,
-      table_name: 'products',
+      process: 'products',
       result: 'Error',
       error_message: err.message,
     });
