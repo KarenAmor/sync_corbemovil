@@ -4,64 +4,91 @@ import * as dotenv from 'dotenv';
 // Importamos node-cron para ejecutar tareas programadas (cronjobs)
 import * as cron from 'node-cron';
 
-// Importamos funciones del servicio de productos: obtener lote, sincronizar producto y eliminarlo
+// Importamos funciones del servicio de productos
 import { getProductsBatch, syncProduct, deleteTempProduct, Product } from '../services/productsService';
 
-// Importamos funciones para registrar logs de información y errores
+// Importamos funciones para registrar logs
 import { logInfo, logError } from '../utils/logger';
 
-// Cargamos las variables de entorno desde el archivo .env
+// Cargamos las variables de entorno
 dotenv.config();
 
-// Definimos el tamaño del lote de sincronización (por defecto 500)
+// Verificamos que las variables de entorno estén cargadas
+console.log('SYNC_BATCH_SIZE:', process.env.SYNC_BATCH_SIZE);
+console.log('SYNC_CRON_EXPRESSION:', process.env.SYNC_CRON_EXPRESSION);
+
+// Definimos el tamaño del lote de sincronización
 const BATCH_SIZE = parseInt(process.env.SYNC_BATCH_SIZE || '500');
+console.log('BATCH_SIZE usado:', BATCH_SIZE);
 
 // Función principal que procesa un lote de productos
 async function syncBatch(): Promise<void> {
+  console.log('Iniciando syncBatch...');
+  
   // Obtenemos el lote desde la base temporal
   const products: Product[] = await getProductsBatch(BATCH_SIZE);
-  if (!products.length) return; // Si no hay productos, se termina
+  console.log('Productos obtenidos:', products.length);
+  console.log('Primeros 2 productos (si existen):', products.slice(0, 2));
+
+  if (!products.length) {
+    console.log('No hay productos para procesar. Finalizando syncBatch.');
+    return;
+  }
 
   // Recorremos todos los productos del lote
   for (const p of products) {
+    console.log(`Procesando producto con referencia: ${p.reference}`);
     try {
-      // Intentamos insertar o actualizar el producto en la base de destino
+      // Intentamos insertar o actualizar el producto
+      console.log('Llamando a syncProduct para:', p.reference);
       await syncProduct(p);
+      console.log(`Producto sincronizado exitosamente: ${p.reference}`);
 
-      // Si fue exitoso, eliminamos el producto de la base temporal
+      // Eliminamos el producto de la base temporal
+      console.log(`Eliminando producto temporal: ${p.reference}`);
       await deleteTempProduct(p.reference);
+      console.log(`Producto eliminado de temporal: ${p.reference}`);
 
     } catch (err: any) {
-      // Si hay un error, lo registramos en la tabla de logs
+      console.error(`Error procesando producto ${p.reference}:`, err.message);
+      // Registramos el error en la tabla de logs
       await logError({
-        sync_type: 'Sync',            // Tipo de log: sincronización
-        record_id: p.reference,       // ID del registro que falló
-        table_name: 'products',       // Nombre de la tabla
-        data: p,                      // Contenido del producto (se puede eliminar si el log debe ir vacío)
-        result: 'Error',              // Resultado: error
-        error_message: err.message,   // Mensaje de error
+        sync_type: 'Sync',
+        record_id: p.reference,
+        table_name: 'products',
+        row_data: p,
+        result: 'Error',
+        error_message: err.message,
       });
     }
   }
 
-  // Si el número de productos procesados es igual al tamaño del lote,
-  // asumimos que podrían haber más y llamamos de nuevo a la función (recursividad controlada)
+  // Verificamos si hay más lotes
+  console.log(`Lote procesado. Tamaño del lote: ${products.length}, BATCH_SIZE: ${BATCH_SIZE}`);
   if (products.length === BATCH_SIZE) {
+    console.log('Posiblemente hay más lotes. Llamando a syncBatch recursivamente.');
     await syncBatch();
+  } else {
+    console.log('No hay más lotes para procesar.');
   }
 }
 
-// Programamos el cronjob para que se ejecute según el intervalo definido en .env
-// Por defecto, se ejecuta cada 10 segundos
+// Programamos el cronjob
+console.log('Programando cronjob...');
 cron.schedule(process.env.SYNC_CRON_EXPRESSION || '*/10 * * * * *', async () => {
-  // Logueamos el inicio de la sincronización
+  console.log('Cronjob iniciado:', new Date().toISOString());
+  
+  // Logueamos el inicio
   await logInfo({ sync_type: 'Sync', table_name: 'products', result: 'Start' });
+  console.log('Log de inicio registrado.');
 
-  // Ejecutamos la sincronización de productos
+  // Ejecutamos la sincronización
   await syncBatch();
+  console.log('Sincronización completada.');
 
-  // Logueamos la finalización de la sincronización
+  // Logueamos la finalización
   await logInfo({ sync_type: 'Sync', table_name: 'products', result: 'End' });
+  console.log('Log de finalización registrado.');
 });
 
 export { syncBatch };
