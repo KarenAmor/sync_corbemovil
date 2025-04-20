@@ -14,8 +14,8 @@ export const tempDb = createPool({
 
 // Verificación conexión ORIGEN
 tempDb.getConnection()
-  .then(() => console.log('✅ Conexión a base de datos ORIGEN exitosa.'))
-  .catch((err) => console.error('❌ Error al conectar a base ORIGEN:', err.message));
+  .then(() => console.log('✅ Successfully connected to ORIGIN database.'))
+  .catch((err) => console.error('❌ Failed to connect to ORIGIN database:', err.message));
 
 // Pool conexión a base de datos de DESTINO
 export const syncDb = createPool({
@@ -28,5 +28,5 @@ export const syncDb = createPool({
 
 // Verificación conexión DESTINO
 syncDb.getConnection()
-  .then(() => console.log('✅ Conexión a base de datos DESTINO exitosa.'))
-  .catch((err) => console.error('❌ Error al conectar a base DESTINO:', err.message));
+  .then(() => console.log('✅ Successfully connected to DESTINATION database.'))
+  .catch((err) => console.error('❌ Failed to connect to DESTINATION database:', err.message));
