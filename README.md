@@ -42,17 +42,23 @@ SYNC-CORBEMOVIL/
 
 ```env
 # Bases de datos
-DB_HOST=
-DB_PORT=
-DB_USERNAME=
-DB_PASSWORD=
-DB_NAME_TEMP=movilven_corbeta_sales_temp
-DB_NAME_SYNC=movilven_corbeta_sales_sync
-DB_SYNCHRONIZE=true
-# Tamaño del lote a sincronizar
-SYNC_BATCH_SIZE=500
-# Cron: cada cuanto se activa
-SYNC_CRON_EXPRESSION=*/10 * * * * *
+# Origin Database 
+DB_HOST_ORIGIN=
+DB_PORT_ORIGIN=
+DB_USERNAME_ORIGIN=
+DB_PASSWORD_ORIGIN=
+DB_NAME_ORIGIN=
+#Destination Database
+DB_HOST_DESTINATION=
+DB_PORT_DESTINATION=
+DB_USERNAME_DESTINATION=
+DB_PASSWORD_DESTINATION=
+DB_NAME_SYNC_DESTINATION=
+DB_SYNCHRONIZE=
+#Sync
+SYNC_BATCH_SIZE=
+#Process
+PRODUCT_SYNC_CRON_EXPRESSION=*/10 * * * * * # cada 3 minutos (solo para pruebas)
 # Activar log en base de datos
 LOG_DB=true
 ```

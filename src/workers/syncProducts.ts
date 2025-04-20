@@ -15,7 +15,7 @@ dotenv.config();
 
 // Verificamos que las variables de entorno estén cargadas
 console.log('SYNC_BATCH_SIZE:', process.env.SYNC_BATCH_SIZE);
-console.log('SYNC_CRON_EXPRESSION:', process.env.SYNC_CRON_EXPRESSION);
+console.log('SYNC_CRON_EXPRESSION:', process.env.PRODUCT_SYNC_CRON_EXPRESSION);
 
 // Definimos el tamaño del lote de sincronización
 const BATCH_SIZE = parseInt(process.env.SYNC_BATCH_SIZE || '500');
@@ -75,7 +75,7 @@ async function syncBatch(): Promise<void> {
 
 // Programamos el cronjob
 console.log('Programando cronjob...');
-cron.schedule(process.env.SYNC_CRON_EXPRESSION || '*/10 * * * * *', async () => {
+cron.schedule(process.env.PRODUCT_SYNC_CRON_EXPRESSION || '*/10 * * * * *', async () => {
   console.log('Cronjob iniciado:', new Date().toISOString());
   
   // Logueamos el inicio

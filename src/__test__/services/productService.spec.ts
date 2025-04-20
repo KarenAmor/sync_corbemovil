@@ -42,7 +42,8 @@ describe('productService', () => {
   it('should sync a product without error', async () => {
     // Simulamos que la consulta a la base de datos de sincronización se resuelve correctamente
     (syncDb.query as jest.Mock).mockResolvedValueOnce([]);
-
+    // Simular INSERT/UPDATE
+    (syncDb.query as jest.Mock).mockResolvedValueOnce([{}]);
     // Verificamos que la función se resuelve correctamente (sin lanzar errores)
     await expect(productService.syncProduct(mockProduct)).resolves.toBeUndefined();
   });
